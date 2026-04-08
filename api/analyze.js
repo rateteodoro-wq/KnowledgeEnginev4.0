@@ -1,6 +1,9 @@
 export const config = { runtime: 'edge' }
 
 const MODEL = 'gemini-3.1-flash-lite-preview'
+const TIMEOUT_MS = 20000
+
+const URL_REGEX = /^https?:\/\//i
 
 export default async function handler(req) {
   if (req.method !== 'POST') {
@@ -24,11 +27,24 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ error: 'Campos systemPrompt e userMessage são obrigatórios' }), { status: 400 })
   }
 
+  // Block URLs before even calling the model
+  const contentLine = userMessage.split('\n').find(l => l.includes('Conteúdo Base:'))
+  const contentValue = contentLine?.split('Conteúdo Base:')[1]?.trim() || ''
+  if (URL_REGEX.test(contentValue)) {
+    return new Response(JSON.stringify({
+      error: 'URLs externas não são suportadas — a maioria dos sites bloqueia o acesso. Cole o texto diretamente no campo de entrada.',
+    }), { status: 422 })
+  }
+
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`
+
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
   try {
     const response = await fetch(endpoint, {
       method: 'POST',
+      signal: controller.signal,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -36,6 +52,8 @@ export default async function handler(req) {
         generationConfig: { maxOutputTokens: 4096, temperature: 0.4 },
       }),
     })
+
+    clearTimeout(timeout)
 
     const data = await response.json()
 
@@ -46,7 +64,7 @@ export default async function handler(req) {
 
     const content = data.candidates?.[0]?.content?.parts?.[0]?.text
     if (!content) {
-      return new Response(JSON.stringify({ error: 'Resposta vazia do modelo. Verifique se o nome do modelo está correto.' }), { status: 500 })
+      return new Response(JSON.stringify({ error: 'Resposta vazia do modelo.' }), { status: 500 })
     }
 
     return new Response(JSON.stringify({ content }), {
@@ -54,6 +72,12 @@ export default async function handler(req) {
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (err) {
+    clearTimeout(timeout)
+    if (err.name === 'AbortError') {
+      return new Response(JSON.stringify({
+        error: 'Tempo limite excedido (20s). O modelo demorou muito para responder. Tente novamente ou reduza o volume do conteúdo.',
+      }), { status: 504 })
+    }
     return new Response(JSON.stringify({ error: err.message || 'Erro interno' }), { status: 500 })
   }
 }
