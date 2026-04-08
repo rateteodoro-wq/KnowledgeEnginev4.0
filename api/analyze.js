@@ -1,6 +1,6 @@
 export const config = { runtime: 'edge' }
 
-const MODEL = 'gemini-2.5-flash-lite-preview-06-17'
+const MODEL = 'gemini-3.1-flash-lite-preview'
 
 export default async function handler(req) {
   if (req.method !== 'POST') {
