@@ -10,7 +10,8 @@ INSTRUÇÕES DE EXECUÇÃO — execute rigorosamente as etapas abaixo conforme o
 Verifique se o texto defende simultaneamente (a) urgência/aceleração e (b) reflexão/lentidão (ou argumentos opostos). Se houver conflito, descreva a 'Contradição Interna' aqui em 2 linhas. Se não houver, ignore esta etapa. (Nota: Preserve essa contradição ao extrair os Bricks da Etapa 1).
 
 **1. DESTILAR (Lego Bricks)**
-Isole o ruído. Extraia de 3 a 5 ideias centrais — os blocos fundamentais que sustentam o argumento do texto. Numere cada bloco. Vá direto ao ponto.
+Isole o ruído. Extraia de 3 a 5 ideias centrais. Numere cada bloco.
+REGRA DE TENSÃO: Se o texto defender conceitos paradoxais simultaneamente (ex: urgência/aceleração vs. reflexão/lentidão), extraia ambos como Bricks separados SEM resolver a tensão. Identifique esses Bricks específicos adicionando a tag [CONTRADIÇÃO] ao lado de seus títulos
 
 **2. CONECTAR (Matriz de Impacto)**
 Para CADA Lego Brick extraído na etapa 1, defina de forma ultra-concisa os três vetores abaixo:
@@ -24,7 +25,8 @@ Para CADA Lego Brick extraído na etapa 1, defina de forma ultra-concisa os trê
 - Nível 2 — Mecânica: Um parágrafo denso e bem estruturado detalhando como a ideia funciona na prática.
 
 **4. ESTRESSAR (Crítica Analítica)** — Execute APENAS se Modo = Completo ou Arquivo
-Atue como advogado do diabo. Identifique os pontos cegos, premissas não testadas, limitações práticas e o que falta para a ideia funcionar em contextos de alta complexidade ou alto risco.
+Atue como advogado do diabo. Identifique pontos cegos, premissas não testadas e limitações práticas.
+GATILHO DE CONFLITO: Se houver algum Brick com a tag [CONTRADIÇÃO] na Etapa 1, obrigatoriamente inicie esta etapa com um subtítulo "Análise da Contradição:" explicando como esse conflito quebra na prática.
 
 **5. AGIR (Next Actions Filtradas)**
 Defina 3 próximos passos hiper-práticos e isolados que podem ser iniciados hoje mesmo.
