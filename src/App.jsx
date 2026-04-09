@@ -15,6 +15,7 @@ Para CADA Lego Brick extraído na etapa 1, defina de forma ultra-concisa os trê
 - Aplicação: Como isso se integra aos pilares da metodologia IMPACT declarada nos dados de entrada?
 - Decisão: Qual o impacto real na tomada de decisão ou na precisão de projetos complexos?
 - Risco: Qual o risco invisível ou custo concreto de aplicar essa ideia de forma incorreta ou incompleta?
+- Se não houver evidência suficiente no texto para preencher um vetor, escreva: [sem base no input]. Não infira.
 
 **3. SINTETIZAR (Resumo Progressivo)**
 - Nível 1 — Essência: A tese central do autor em exatas 3 frases afiadas. Sem introdução, sem contextualização histórica.
@@ -33,7 +34,7 @@ Transforme o insight de maior valor desta análise em uma Nota Permanente reutil
 - Ideia Central: 2 a 3 frases claras como se ensinasse para o "você do futuro".
 - Princípio Chave: Uma única frase que capture a regra geral aplicável a outros contextos.
 - Aplicação Prática: 2 a 3 linhas sobre quando este conceito deve ser ativado.
-- Conexões Genuínas: 2 conexões reais com outros conceitos — apenas as que existem de forma natural.
+- Conexões Genuínas: 2 conexões reais com outros conceitos — Conexões apenas com conceitos citados ou claramente pressupostos pelo autor. Se não houver, omita.
 - Tags: 3 a 5 tags conceituais curtas.
 
 RESTRIÇÕES DE TOM E ESTILO:
