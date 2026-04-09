@@ -266,7 +266,7 @@ export default function App() {
                 </button>
               </div>
               <div className="prose" style={{ padding: '2rem 2.5rem', maxWidth: 760 }}>
-                <ReactMarkdown>{result}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown>
               </div>
             </div>
           )}
