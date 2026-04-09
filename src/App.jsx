@@ -63,7 +63,7 @@ const buildUserMessage = ({ objective, impactMethod, mode, content }) => `
 - Modo de Processamento: ${mode}
 - Conteúdo Base: ${content}
 
-Execute a análise KNOWLEDGE ENGINE v4.0 agora.`;
+Execute a análise KNOWLEDGE ENGINE v4.0 agora.;
 
 `
 
@@ -307,4 +307,5 @@ export default function App() {
       </footer>
     </div>
   )
+}
 }
