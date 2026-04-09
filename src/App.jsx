@@ -24,7 +24,7 @@ Para CADA Lego Brick extraído na etapa 1, defina de forma ultra-concisa os trê
 
 **4. ESTRESSAR (Crítica Analítica)** — Execute APENAS se Modo = Completo ou Arquivo
 Atue como advogado do diabo. Identifique os pontos cegos, premissas não testadas, limitações práticas e o que falta para a ideia funcionar em contextos de alta complexidade ou alto risco.
-Verifique se os Lego Bricks extraídos são consistentes entre si. Identifique contradições internas antes de criticar fatores externos.
+Se dois Lego Bricks forem logicamente contraditórios entre si, sinalize explicitamente essa tensão na Etapa 4 antes de analisar fatores externos
 
 **5. AGIR (Next Actions Filtradas)**
 Defina 3 próximos passos hiper-práticos e isolados que podem ser iniciados hoje mesmo.
