@@ -47,6 +47,7 @@ Transforme o insight de maior valor desta análise em uma Nota Permanente reutil
 - Título: [Nome curto, memorável e específico do conceito]
 - Ideia Central: 2 a 3 frases claras como se ensinasse para o "você do futuro".
 - Princípio Chave: Uma única frase que capture a regra geral aplicável a outros contextos.
+- Nível de Evidência" — Faça distinção se a ideia central vem de pesquisa replicada, estudo único, hipótese do pesquisador, ou especulação do apresentador.
 - Aplicação Prática: 2 a 3 linhas sobre quando este conceito deve ser ativado.
 - Conexões Genuínas: 2 conexões reais com outros conceitos — Conexões apenas com conceitos citados ou claramente pressupostos pelo autor. Se não houver, omita.
 - Tags: 3 a 5 tags conceituais curtas.
