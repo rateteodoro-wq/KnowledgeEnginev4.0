@@ -1,5 +1,5 @@
 export const config = { runtime: 'edge' }
-const MODEL = 'gemini-3.1-flash-lite-preview'
+const MODEL = 'gemini-3-flash-preview'
 const TIMEOUT_MS = 30000
 const URL_REGEX = /^https?:\/\//i
 export default async function handler(req) {
