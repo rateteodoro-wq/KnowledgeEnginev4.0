@@ -28,7 +28,7 @@ export default async function handler(req) {
       error: 'URLs externas não são suportadas — a maioria dos sites bloqueia o acesso. Cole o texto diretamente no campo de entrada.',
     }), { status: 422 })
   }
-  const endpoint = https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`;
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
   try {
