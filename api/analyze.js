@@ -1,7 +1,7 @@
-export const config = { runtime: 'edge' }
+export const config = { runtime: 'nodejs' }
 
 const MODEL = 'claude-sonnet-4-6'
-const TIMEOUT_MS = 20000
+const TIMEOUT_MS = 60000
 
 const URL_REGEX = /^https?:\/\//i
 
