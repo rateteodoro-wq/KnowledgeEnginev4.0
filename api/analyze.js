@@ -1,48 +1,51 @@
-export const config = { runtime: 'nodejs' }
+export const config = {
+  runtime: 'nodejs',
+  maxDuration: 60,
+}
 
 const MODEL = 'claude-sonnet-4-6'
-const TIMEOUT_MS = 60000
-
 const URL_REGEX = /^https?:\/\//i
 
-export default async function handler(req) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 })
+    return res.status(405).json({ error: 'Method not allowed' })
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY não configurada nas variáveis de ambiente.' }), { status: 500 })
+    return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada nas variáveis de ambiente.' })
   }
 
-  let body
+  let body = ''
+  await new Promise((resolve) => {
+    req.on('data', chunk => { body += chunk })
+    req.on('end', resolve)
+  })
+
+  let parsed
   try {
-    body = await req.json()
+    parsed = JSON.parse(body)
   } catch {
-    return new Response(JSON.stringify({ error: 'Body inválido' }), { status: 400 })
+    return res.status(400).json({ error: 'Body inválido' })
   }
 
-  const { systemPrompt, userMessage } = body
+  const { systemPrompt, userMessage } = parsed
   if (!systemPrompt || !userMessage) {
-    return new Response(JSON.stringify({ error: 'Campos systemPrompt e userMessage são obrigatórios' }), { status: 400 })
+    return res.status(400).json({ error: 'Campos systemPrompt e userMessage são obrigatórios' })
   }
 
   // Block URLs before calling the model
   const contentLine = userMessage.split('\n').find(l => l.includes('Conteúdo Base:'))
   const contentValue = contentLine?.split('Conteúdo Base:')[1]?.trim() || ''
   if (URL_REGEX.test(contentValue)) {
-    return new Response(JSON.stringify({
+    return res.status(422).json({
       error: 'URLs externas não são suportadas. Cole o texto diretamente no campo de entrada.',
-    }), { status: 422 })
+    })
   }
-
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': apiKey,
@@ -56,31 +59,20 @@ export default async function handler(req) {
       }),
     })
 
-    clearTimeout(timeout)
-
     const data = await response.json()
 
     if (!response.ok) {
       const msg = data.error?.message || 'Erro na API Anthropic'
-      return new Response(JSON.stringify({ error: msg }), { status: response.status })
+      return res.status(response.status).json({ error: msg })
     }
 
     const content = data.content?.[0]?.text
     if (!content) {
-      return new Response(JSON.stringify({ error: 'Resposta vazia do modelo.' }), { status: 500 })
+      return res.status(500).json({ error: 'Resposta vazia do modelo.' })
     }
 
-    return new Response(JSON.stringify({ content }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    })
+    return res.status(200).json({ content })
   } catch (err) {
-    clearTimeout(timeout)
-    if (err.name === 'AbortError') {
-      return new Response(JSON.stringify({
-        error: 'Tempo limite excedido (20s). Tente novamente ou reduza o volume do conteúdo.',
-      }), { status: 504 })
-    }
-    return new Response(JSON.stringify({ error: err.message || 'Erro interno' }), { status: 500 })
+    return res.status(500).json({ error: err.message || 'Erro interno' })
   }
 }
