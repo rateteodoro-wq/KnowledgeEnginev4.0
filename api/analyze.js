@@ -16,20 +16,9 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada nas variáveis de ambiente.' })
   }
 
-  let body = ''
-  await new Promise((resolve) => {
-    req.on('data', chunk => { body += chunk })
-    req.on('end', resolve)
-  })
+  // Vercel Node.js runtime auto-parses JSON body
+  const { systemPrompt, userMessage } = req.body || {}
 
-  let parsed
-  try {
-    parsed = JSON.parse(body)
-  } catch {
-    return res.status(400).json({ error: 'Body inválido' })
-  }
-
-  const { systemPrompt, userMessage } = parsed
   if (!systemPrompt || !userMessage) {
     return res.status(400).json({ error: 'Campos systemPrompt e userMessage são obrigatórios' })
   }
@@ -59,7 +48,13 @@ export default async function handler(req, res) {
       }),
     })
 
-    const data = await response.json()
+    let data
+    const text = await response.text()
+    try {
+      data = JSON.parse(text)
+    } catch {
+      return res.status(500).json({ error: `Resposta inválida da API: ${text.slice(0, 200)}` })
+    }
 
     if (!response.ok) {
       const msg = data.error?.message || 'Erro na API Anthropic'
