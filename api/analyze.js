@@ -1,39 +1,34 @@
-export const config = {
-  runtime: 'nodejs',
-  maxDuration: 60,
-}
-
 const MODEL = 'claude-sonnet-4-6'
 const URL_REGEX = /^https?:\/\//i
 
 export default async function handler(req, res) {
+  res.setHeader('Content-Type', 'application/json')
+
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' })
+    return res.status(405).end(JSON.stringify({ error: 'Method not allowed' }))
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
-    return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada nas variáveis de ambiente.' })
+    return res.status(500).end(JSON.stringify({ error: 'ANTHROPIC_API_KEY não configurada.' }))
   }
 
-  // Vercel Node.js runtime auto-parses JSON body
   const { systemPrompt, userMessage } = req.body || {}
 
   if (!systemPrompt || !userMessage) {
-    return res.status(400).json({ error: 'Campos systemPrompt e userMessage são obrigatórios' })
+    return res.status(400).end(JSON.stringify({ error: 'Campos obrigatórios ausentes.' }))
   }
 
-  // Block URLs before calling the model
   const contentLine = userMessage.split('\n').find(l => l.includes('Conteúdo Base:'))
   const contentValue = contentLine?.split('Conteúdo Base:')[1]?.trim() || ''
   if (URL_REGEX.test(contentValue)) {
-    return res.status(422).json({
-      error: 'URLs externas não são suportadas. Cole o texto diretamente no campo de entrada.',
-    })
+    return res.status(422).end(JSON.stringify({
+      error: 'URLs externas não são suportadas. Cole o texto diretamente.',
+    }))
   }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -48,26 +43,31 @@ export default async function handler(req, res) {
       }),
     })
 
+    const raw = await anthropicRes.text()
+
     let data
-    const text = await response.text()
     try {
-      data = JSON.parse(text)
+      data = JSON.parse(raw)
     } catch {
-      return res.status(500).json({ error: `Resposta inválida da API: ${text.slice(0, 200)}` })
+      return res.status(500).end(JSON.stringify({
+        error: `API retornou resposta inválida: ${raw.slice(0, 300)}`
+      }))
     }
 
-    if (!response.ok) {
-      const msg = data.error?.message || 'Erro na API Anthropic'
-      return res.status(response.status).json({ error: msg })
+    if (!anthropicRes.ok) {
+      return res.status(anthropicRes.status).end(JSON.stringify({
+        error: data.error?.message || `Erro HTTP ${anthropicRes.status}`
+      }))
     }
 
     const content = data.content?.[0]?.text
     if (!content) {
-      return res.status(500).json({ error: 'Resposta vazia do modelo.' })
+      return res.status(500).end(JSON.stringify({ error: 'Resposta vazia do modelo.' }))
     }
 
-    return res.status(200).json({ content })
+    return res.status(200).end(JSON.stringify({ content }))
+
   } catch (err) {
-    return res.status(500).json({ error: err.message || 'Erro interno' })
+    return res.status(500).end(JSON.stringify({ error: err.message || 'Erro interno' }))
   }
 }
