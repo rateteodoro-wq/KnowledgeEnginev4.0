@@ -1,73 +1,68 @@
-const MODEL = 'claude-haiku-4-5-20251001'
+export const config = { runtime: 'edge' }
+const MODEL = 'gemini-3-flash-preview'
+const TIMEOUT_MS = 30000
 const URL_REGEX = /^https?:\/\//i
-
-export default async function handler(req, res) {
-  res.setHeader('Content-Type', 'application/json')
-
+export default async function handler(req) {
   if (req.method !== 'POST') {
-    return res.status(405).end(JSON.stringify({ error: 'Method not allowed' }))
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 })
   }
-
-  const apiKey = process.env.ANTHROPIC_API_KEY
+  const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
-    return res.status(500).end(JSON.stringify({ error: 'ANTHROPIC_API_KEY não configurada.' }))
+    return new Response(JSON.stringify({ error: 'GEMINI_API_KEY não configurada nas variáveis de ambiente.' }), { status: 500 })
   }
-
-  const { systemPrompt, userMessage } = req.body || {}
-
+  let body
+  try {
+    body = await req.json()
+  } catch {
+    return new Response(JSON.stringify({ error: 'Body inválido' }), { status: 400 })
+  }
+  const { systemPrompt, userMessage } = body
   if (!systemPrompt || !userMessage) {
-    return res.status(400).end(JSON.stringify({ error: 'Campos obrigatórios ausentes.' }))
+    return new Response(JSON.stringify({ error: 'Campos systemPrompt e userMessage são obrigatórios' }), { status: 400 })
   }
-
+  // Block URLs before even calling the model
   const contentLine = userMessage.split('\n').find(l => l.includes('Conteúdo Base:'))
   const contentValue = contentLine?.split('Conteúdo Base:')[1]?.trim() || ''
   if (URL_REGEX.test(contentValue)) {
-    return res.status(422).end(JSON.stringify({
-      error: 'URLs externas não são suportadas. Cole o texto diretamente.',
-    }))
+    return new Response(JSON.stringify({
+      error: 'URLs externas não são suportadas — a maioria dos sites bloqueia o acesso. Cole o texto diretamente no campo de entrada.',
+    }), { status: 422 })
   }
-
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`;
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
   try {
-    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
+      signal: controller.signal,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 4096,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userMessage }],
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+        generationConfig: { maxOutputTokens: 4096, temperature: 0.4 },
       }),
     })
-
-    const raw = await anthropicRes.text()
-
-    let data
-    try {
-      data = JSON.parse(raw)
-    } catch {
-      return res.status(500).end(JSON.stringify({
-        error: `API retornou resposta inválida: ${raw.slice(0, 300)}`
-      }))
+    clearTimeout(timeout)
+    const data = await response.json()
+    if (!response.ok) {
+      const msg = data.error?.message || 'Erro na API Gemini'
+      return new Response(JSON.stringify({ error: msg }), { status: response.status })
     }
-
-    if (!anthropicRes.ok) {
-      return res.status(anthropicRes.status).end(JSON.stringify({
-        error: data.error?.message || `Erro HTTP ${anthropicRes.status}`
-      }))
-    }
-
-    const content = data.content?.[0]?.text
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text
     if (!content) {
-      return res.status(500).end(JSON.stringify({ error: 'Resposta vazia do modelo.' }))
+      return new Response(JSON.stringify({ error: 'Resposta vazia do modelo.' }), { status: 500 })
     }
-
-    return res.status(200).end(JSON.stringify({ content }))
-
+    return new Response(JSON.stringify({ content }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
   } catch (err) {
-    return res.status(500).end(JSON.stringify({ error: err.message || 'Erro interno' }))
+    clearTimeout(timeout)
+    if (err.name === 'AbortError') {
+      return new Response(JSON.stringify({
+        error: 'Tempo limite excedido (20s). O modelo demorou muito para responder. Tente novamente ou reduza o volume do conteúdo.',
+      }), { status: 504 })
+    }
+    return new Response(JSON.stringify({ error: err.message || 'Erro interno' }), { status: 500 })
   }
 }
