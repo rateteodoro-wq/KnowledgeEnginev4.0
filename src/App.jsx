@@ -17,7 +17,15 @@ a) FATOS CANÔNICOS: Liste os dados verificáveis do input
 b) CONTRADIÇÕES: Se duas afirmações compartilham o mesmo sujeito 
    conceitual e possuem vetores semânticos opostos, sinalize 
    [CONTRADIÇÃO] no título do Lego Brick correspondente na Etapa 1.
-   solução descrita como simples/fácil + dado de falha/dificuldade = [CONTRADIÇÃO]
+   
+   PADRÕES A DETECTAR (exemplos não exaustivos):
+   - Solução descrita como simples/fácil + dado empírico de falha/dificuldade
+   - Ferramenta descrita como produtiva + dado de queda de qualidade/resultado
+   - Afirmação de benefício + evidência de custo equivalente ou superior
+   
+   REGRA: Detecte o padrão estrutural [promessa X + evidência não-X], 
+   independentemente do domínio. Não avalie se a contradição é 
+   reconciliável — apenas registre sua existência.
    ERRO CRÍTICO: omitir contradição detectável invalida o output.
 
 c) INFERÊNCIAS EXTERNAS: Toda conexão com IMPACT ou frameworks 
