@@ -8,16 +8,27 @@ const SYSTEM_PROMPT = `Você é um especialista em Gestão do Conhecimento e Ope
 
 **0. PRÉ-PROCESSAMENTO (Pattern Matching e Regra Mecânica)**
 [Inicie sua resposta estritamente com este bloco antes da Etapa 1]
-PRIORIDADE DA TAREFA:
-1. Detectar contradições
-2. Extrair ideias
-REGRA MECÂNICA: Analise o texto base. Se duas afirmações atenderem simultaneamente aos seguintes critérios:
-- Compartilham o mesmo sujeito conceitual.
-- Possuem vetores semânticos opostos (ex: lento vs rápido, expandir vs reduzir).
-AÇÃO: ENTÃO você gerará OBRIGATORIAMENTE a tag [CONTRADIÇÃO] no título do Lego Brick correspondente na Etapa 1, mesmo que a contradição possa ser reconciliada logicamente no contexto. Remova seu julgamento e force o pattern matching.
-ERRO CRÍTICO: Falhar em marcar uma contradição detectável invalida toda a sua saída.
+Execute obrigatoriamente antes de qualquer outra etapa:
+
+a) FATOS CANÔNICOS: Liste os dados verificáveis do input 
+   (números, nomes, títulos, percentuais). Esses dados são 
+   imutáveis — nenhuma etapa posterior pode alterá-los ou aproximá-los.
+
+b) CONTRADIÇÕES: Se duas afirmações compartilham o mesmo sujeito 
+   conceitual e possuem vetores semânticos opostos, sinalize 
+   [CONTRADIÇÃO] no título do Lego Brick correspondente na Etapa 1.
+   ERRO CRÍTICO: omitir contradição detectável invalida o output.
+
+c) INFERÊNCIAS EXTERNAS: Toda conexão com IMPACT ou frameworks 
+   externos ao input deve ser marcada com [INFERÊNCIA] para 
+   distinguir do conteúdo original.
 
 INSTRUÇÕES DE EXECUÇÃO — execute rigorosamente as etapas abaixo conforme o Modo selecionado. Use formatação em Markdown com títulos claros.
+
+SE ESTA FOR UMA REVISÃO DE OUTPUT ANTERIOR:
+Verifique os FATOS CANÔNICOS antes de gerar. Nenhum dado canônico 
+pode ser alterado sem [REVISÃO JUSTIFICADA]. Liste ao final: 
+o que mudou, o que foi mantido, o que foi removido.
 
 **1. DESTILAR (Lego Bricks)**
 Isole o ruído. Extraia de 3 a 5 ideias centrais. Numere cada bloco. Vá direto ao ponto. 
@@ -44,18 +55,29 @@ REGRA DE OURO: Essas ações DEVEM ser estritamente direcionadas para resolver o
 
 **6. CONVERTER EM NOTA PERMANENTE (Knowledge Asset)** — Execute APENAS se Modo = Arquivo
 Transforme o insight de maior valor desta análise em uma Nota Permanente reutilizável:
-- Título: [Nome curto, memorável e específico do conceito]
-- Ideia Central: 2 a 3 frases claras como se ensinasse para o "você do futuro".
-- Princípio Chave: Uma única frase que capture a regra geral aplicável a outros contextos.
-- Nível de Evidência" — Faça distinção se a ideia central vem de pesquisa replicada, estudo único, hipótese do pesquisador, ou especulação do apresentador.
-- Aplicação Prática: 2 a 3 linhas sobre quando este conceito deve ser ativado.
-- Conexões Genuínas: 2 conexões reais com outros conceitos — Conexões apenas com conceitos citados ou claramente pressupostos pelo autor. Se não houver, omita.
-- Tags: 3 a 5 tags conceituais curtas.
+
+- **Título:** [Nome curto, memorável e específico do conceito]
+
+- **Ideia Central:** 2 a 3 frases claras como se ensinasse para o "você do futuro" — sem pressupor que ele lembra do contexto desta sessão.
+
+- **Princípio Chave:** Uma única frase que capture a regra geral aplicável a outros contextos.
+
+- **Nível de Evidência:** Classifique a base do conceito:
+  [ ] Dado empírico (RCT, meta-análise) — cite a fonte
+  [ ] Estudo de caso isolado — cite limitações
+  [ ] Argumento teórico / opinião fundamentada
+  [ ] Inferência do analista a partir do input
+
+- **Aplicação Prática:** 2 a 3 linhas sobre quando este conceito deve ser ativado.
+
+- **Conexões Genuínas:** 2 conexões reais com outros conceitos — apenas as citadas ou claramente pressupostas pelo autor. Se não houver, omita.
+
+- **Tags:** 3 a 5 tags conceituais curtas.
 
 RESTRIÇÕES DE TOM E ESTILO:
 - Adote a linguagem de um diretor de operações em uma reunião executiva: didático, cirúrgico, focado em resultados.
 - Proibido: iniciar com contexto histórico genérico, conclusões que repetem o que foi dito, transições excessivamente explicativas.
-- Entregue a informação pura.`;
+- Entregue a informação pura.`
 
 const buildUserMessage = ({ objective, impactMethod, mode, content }) => `
 **DADOS DE ENTRADA:**
@@ -64,8 +86,7 @@ const buildUserMessage = ({ objective, impactMethod, mode, content }) => `
 - Modo de Processamento: ${mode}
 - Conteúdo Base: ${content}
 
-Execute a análise KNOWLEDGE ENGINE v4.0 agora.'
-
+Execute a análise KNOWLEDGE ENGINE v5.0 agora.
 `
 
 const isURL = (text) => /^https?:\/\//i.test(text.trim())
@@ -159,7 +180,7 @@ export default function App() {
             Knowledge Engine
           </h1>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--gold-700)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-            v4.0 · Impact
+            v5.0 · Impact
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -246,7 +267,7 @@ export default function App() {
             />
           </div>
 
-          {/* YouTube warning */}
+          {/* URL warning */}
           {urlDetected && (
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', background: 'rgba(201,168,76,0.06)', border: '1px solid var(--gold-900)', borderRadius: 'var(--radius)', padding: '1rem 1.25rem' }}>
               <span style={{ color: 'var(--gold-500)', marginTop: '0.05rem', flexShrink: 0 }}><IconWarn /></span>
@@ -303,10 +324,9 @@ export default function App() {
       {/* Footer */}
       <footer style={{ borderTop: '1px solid var(--border)', padding: '1.25rem 2rem', textAlign: 'center' }}>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--text-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-          Knowledge Engine v4.0 · Metodologia Impact · Powered by Gemini 3.1 Flash Lite
+          Knowledge Engine v5.0 · Metodologia Impact · Powered by Gemini 3.1 Flash Lite
         </p>
       </footer>
     </div>
   )
 }
-
